@@ -4,10 +4,12 @@ export interface Client {
   name: string;
 }
 
-export interface Account {
+export interface AccountBank {
   clientId: number;
   bankId: number;
   balance: number;
+  total?: number;
+  nameCliente?: string;
 }
 
 export interface Bank {
@@ -24,9 +26,10 @@ export const clients: Client []  = [
   { id: 6, taxNumber: '99804238', name: 'MOHAMED FERRE SAMPER' }
 ];
 
-export const accounts: Account[] = [
+export const accounts: AccountBank[] = [
   { clientId: 6, bankId: 1, balance: 15000 },
   { clientId: 1, bankId: 3, balance: 18000 },
+  { clientId: 6, bankId: 1, balance: 19200 },
   { clientId: 5, bankId: 3, balance: 135000 },
   { clientId: 2, bankId: 2, balance: 5600 },
   { clientId: 3, bankId: 1, balance: 23000 },
@@ -37,7 +40,6 @@ export const accounts: Account[] = [
   { clientId: 5, bankId: 1, balance: 89000 },
   { clientId: 1, bankId: 2, balance: 1600 },
   { clientId: 5, bankId: 3, balance: 37500 },
-  { clientId: 6, bankId: 1, balance: 19200 },
   { clientId: 2, bankId: 3, balance: 10000 },
   { clientId: 3, bankId: 2, balance: 5400 },
   { clientId: 3, bankId: 1, balance: 9000 },
