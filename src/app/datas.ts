@@ -5,7 +5,7 @@ export interface Client {
 }
 
 export interface AccountBank {
-  clientId: number;
+  clientId?: number;
   bankId: number;
   balance: number;
   total?: number;

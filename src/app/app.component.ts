@@ -18,12 +18,11 @@ export class AppComponent {
   constructor() {
     this.clienteBancos = this.accountReducer();
 
-    console.log(this.richClientsBalances(1, 25000));
+    console.log(this.newClientRanking());
+    console.log(this.sortSaldosForBank());
+
 
   }
-
-
-
 
   listClientsIds() {
     return clients.map((client) => client.id);
@@ -80,7 +79,7 @@ export class AppComponent {
   // 2 Arreglo con los nombres de cliente ordenados
   // de mayor a menor por la suma TOTAL de los saldos
   // de cada cliente en los bancos que participa.
-  sortSaldosForBank() {
+  sortSaldosForBank(): AccountBank[] {
     const clientForBank = [];
     _.forEach(this.banks, (bank) => {
       clientForBank.push(this.getClientesPorBanco(this.accountReducer(), bank.id));
@@ -180,6 +179,94 @@ export class AppComponent {
       return _.orderBy(saldos, ['total'], ['desc']);
       // tslint:disable-next-line:curly
     } else return null;
+
+  }
+
+  // 5 Arreglo con ids de bancos ordenados crecientemente por la cantidad TOTAL de dinero que administran.
+   banksRankingByTotalBalance() {
+  // CODE HERE
+  const cuentas = this.sortInformationForBank(this.accountReducer());
+  const arrayBancos =  [];
+    _.forEach(cuentas, (value, key ) => {
+      const infor = {};
+      const saldoTotalBanco =  _.reduce(value, (result, bank) => {
+        result += bank.total;
+        return result;
+      }, 0);
+
+      infor['idBanco'] = key;
+      infor ['total'] = saldoTotalBanco;
+
+      arrayBancos.push(infor);
+
+    });
+  return _.orderBy(arrayBancos, ['total'], ['asc']);
+}
+
+// 6 Objeto en que las claves sean los nombres de los bancos y los
+// valores el número de clientes que solo tengan cuentas en ese banco.
+  banksFidelity() {
+    // CODE HERE
+    const cuentas = this.sortInformationForBank(this.accountReducer());
+    const inforBanks = {};
+
+     _.forEach(cuentas, (value, key) => {
+      const myBank = _.find(this.banks, (bank) => {
+        return bank.id === +key;
+      });
+      inforBanks[myBank.name] = value.length;
+    });
+
+    return inforBanks;
+  }
+
+  // 7 Objeto en que las claves sean los nombres de los bancos y los valores el id de su cliente con menos dinero.
+ banksPoorClients() {
+  const cuentas = this.sortInformationForBank(this.accountReducer());
+
+  const inforBanks = {};
+
+  _.forEach(cuentas, (value, key) => {
+   const myBank = _.find(this.banks, (bank) => {
+     return bank.id === +key;
+   });
+   inforBanks[myBank.name] = value[(value.length - 1)].clientId;
+ });
+  return inforBanks;
+}
+
+// 8 Agregar nuevo cliente con datos ficticios a "clientes" y agregar una cuenta en
+// el BANCO ESTADO con un saldo de 9000 para este nuevo empleado.
+// Luego devolver el lugar que ocupa este cliente en el ranking de la pregunta 2.
+// No modificar arreglos originales para no alterar las respuestas anteriores al correr la solución
+  newClientRanking() {
+    const clienteNuevo = this.addClient('26454212K', 'Carlos Talavera');
+    const cuentaNuevo = this.addClienteBanco();
+    const listPreguntaDos = this.sortSaldosForBank();
+
+    console.log(' el listado es ', listPreguntaDos);
+ }
+
+  addClient( taxNumber: string, name: string, id = (this.clients.length + 1)): Client {
+
+    const newClient: Client = {
+      id: id,
+      name: name,
+      taxNumber: taxNumber
+    };
+    this.clients.push(newClient);
+    return this.clients[(this.clients.length - 1)];
+  }
+
+  addClienteBanco(balance = 9000, bankId = this.banks[2].id, clientId = this.clients.length): AccountBank {
+    const newAccount: AccountBank = {
+      clientId: clientId,
+      bankId:  bankId,
+      balance: balance
+    };
+
+    this.accounts.push(newAccount);
+    return this.accounts[(this.accounts.length - 1)];
 
   }
 }
