@@ -58,15 +58,3 @@ export const banks: Bank[] = [
   { id: 3, name: 'ESTADO' }
 ];
 
-const obj = [{
-              idClient: 21,
-              banco: [
-                { idBanco: 1,
-                  total: 'total'
-                },
-                { idBanco: 1,
-                  total: 'total'
-                }
-              ]
-            }];
-

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { clients, banks, accounts, Client, AccountBank } from './datas';
+import { clients, banks, accounts, Client, AccountBank, Bank } from './datas';
 import * as _ from 'lodash';
 import { Dictionary } from 'lodash';
 
@@ -13,10 +13,14 @@ export class AppComponent {
   clients = clients.slice();
   accounts = accounts.slice();
   banks = banks.slice();
+  clienteBancos: AccountBank[] = null;
 
   constructor() {
-    console.log(this.sortSaldosForBank());
- }
+    this.clienteBancos = this.accountReducer();
+
+    console.log(this.richClientsBalances(1, 25000));
+
+  }
 
 
 
@@ -61,7 +65,7 @@ export class AppComponent {
       if (c) {
         bancos.push({ 'bankId': 3, 'total': c });
       }
-       clienteBanco.push({ 'clientId': key, 'bancos': bancos });
+      clienteBanco.push({ 'clientId': key, 'bancos': bancos });
     });
 
     return clienteBanco;
@@ -77,9 +81,9 @@ export class AppComponent {
   // de mayor a menor por la suma TOTAL de los saldos
   // de cada cliente en los bancos que participa.
   sortSaldosForBank() {
-   let clientForBank = [];
+    const clientForBank = [];
     _.forEach(this.banks, (bank) => {
-     clientForBank.push(this.getClientesPorBanco(this.accountReducer(), bank.id));
+      clientForBank.push(this.getClientesPorBanco(this.accountReducer(), bank.id));
     });
 
     return clientForBank;
@@ -89,40 +93,93 @@ export class AppComponent {
     const clientList = _.filter(cuentas, (cuenta) => {
       return (cuenta.bankId === idBanco);
     });
-    const saldos =  _.orderBy(clientList, ['total'], ['desc']);
-    _.forEach(saldos,  (cuenta) => {
-       const findCliente = _.find(this.clients, (client ) => {
-          return (cuenta.clientId === client.id);
-        });
-        cuenta.nameCliente = findCliente.name;
+    const saldos = _.orderBy(clientList, ['total'], ['desc']);
+    _.forEach(saldos, (cuenta) => {
+      const findCliente = _.find(this.clients, (client) => {
+        return (cuenta.clientId === client.id);
+      });
+      cuenta.nameCliente = findCliente.name;
     });
     return saldos;
   }
 
-  accountReducer() {
-    return _.reduce(this.accounts, function(result, value, key) {
-        const cliente = value.clientId;
-        const banco =  value.bankId;
-        const rs: AccountBank[] = result;
-        let elementMatch: AccountBank = null;
+  accountReducer(): AccountBank[] {
+    return _.reduce(this.accounts, function (result, value, key) {
+      const cliente = value.clientId;
+      const banco = value.bankId;
+      const rs: AccountBank[] = result;
+      let elementMatch: AccountBank = null;
 
-         if (result && result.length > 0) {
-             elementMatch = _.find(rs, (o) => {
-               return (o['clientId'] === cliente && o['bankId'] === banco);
-           });
-         }
+      if (result && result.length > 0) {
+        elementMatch = _.find(rs, (o) => {
+          return (o['clientId'] === cliente && o['bankId'] === banco);
+        });
+      }
 
-        if (!elementMatch) {
-           const add ={};
-           add['clientId'] = value.clientId;
-           add['bankId'] = value.bankId;
-           add['total'] = value.balance;
-           result.push(add);
-        } else {
-          elementMatch['total'] += value.balance;
+      if (!elementMatch) {
+        const add = {};
+        add['clientId'] = value.clientId;
+        add['bankId'] = value.bankId;
+        add['total'] = value.balance;
+        result.push(add);
+      } else {
+        elementMatch['total'] += value.balance;
+      }
+      return result;
+    }, []);
+  }
+
+  // 3 Objeto en que las claves sean los nombres de los bancos
+  // y los valores un arreglo con los ruts de sus clientes ordenados alfabeticamente por nombre.
+  banksClientsTaxNumbers() {
+    const bancosClientes = {};
+    const cuentas = this.sortInformationForBank(this.accountReducer());
+    _.forEach(cuentas, (value, key) => {
+
+      let banco: Bank = null;
+      banco = _.find(this.banks, (bank) => {
+        return (bank.id === +key);
+      });
+
+      let listClient: Client[] = null;
+
+      listClient = _.reduce(value, (result: Client[], cuentaCliente, key) => {
+        let client: Client = null;
+        client = _.find(this.clients, (cl) => {
+          return (cl.id === cuentaCliente.clientId);
+        });
+        result.push(client);
+        return result;
+      }, []);
+
+      listClient = _.orderBy(listClient, ['name'], ['asc']);
+      bancosClientes[banco.name] = listClient;
+
+    });
+    return bancosClientes;
+  }
+
+  sortInformationForBank(clientes: AccountBank[]) {
+    if (clientes) {
+      return _.groupBy(clientes, 'bankId');
+    }
+  }
+
+  // 4 Arreglo ordenado decrecientemente con los saldos de clientes que tengan más de 25.000 en el Banco SANTANDER
+  richClientsBalances(idBanco: number, saldo: number): AccountBank[] | null {
+    const cuentas = this.sortInformationForBank(this.accountReducer());
+
+    if (_.isInteger(idBanco) && _.has(cuentas, idBanco)) {
+      const saldos = _.reduce(cuentas[idBanco], (result: AccountBank[], value: AccountBank, key) => {
+        if (value.total > saldo) {
+          result.push(value);
         }
-       return result;
-     }, []);
-   }
+        return result;
+      }, []);
 
+      return _.orderBy(saldos, ['total'], ['desc']);
+      // tslint:disable-next-line:curly
+    } else return null;
+
+  }
 }
