@@ -260,7 +260,6 @@ export class AppComponent {
     return msj;
   }
 
-
   addClient(taxNumber: string, name: string, id = (this.clients.length + 1) ): Client {
 
     const newClient: Client = {
