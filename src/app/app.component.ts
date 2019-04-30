@@ -18,11 +18,11 @@ export class AppComponent {
   constructor() {
     this.clienteBancos = this.accountReducer();
 
-    console.log(this.newClientRanking());
-    console.log(this.sortSaldosForBank());
-
-
+   console.log('---> ', this.newClientRanking());
   }
+
+
+
 
   listClientsIds() {
     return clients.map((client) => client.id);
@@ -76,8 +76,7 @@ export class AppComponent {
     });
   }
 
-  // 2 Arreglo con los nombres de cliente ordenados
-  // de mayor a menor por la suma TOTAL de los saldos
+  // 2 Arreglo con los nombres de cliente ordenados de mayor a menor por la suma TOTAL de los saldos
   // de cada cliente en los bancos que participa.
   sortSaldosForBank(): AccountBank[] {
     const clientForBank = [];
@@ -239,23 +238,38 @@ export class AppComponent {
 // el BANCO ESTADO con un saldo de 9000 para este nuevo empleado.
 // Luego devolver el lugar que ocupa este cliente en el ranking de la pregunta 2.
 // No modificar arreglos originales para no alterar las respuestas anteriores al correr la solución
-  newClientRanking() {
-    const clienteNuevo = this.addClient('26454212K', 'Carlos Talavera');
-    const cuentaNuevo = this.addClienteBanco();
+  newClientRanking(idBanco = 3): string | null {
+
+    const tupla_cliente_nuevo: [string, string] = ['26454212K', 'Carlos Talavera']
+    const cliente_nuevo = this.addClient(...tupla_cliente_nuevo);
+    this.addClienteBanco();
     const listPreguntaDos = this.sortSaldosForBank();
+    let msj: string = null;
 
-    console.log(' el listado es ', listPreguntaDos);
- }
+    _.forEach(listPreguntaDos, (value, key) => {
+      if (value[0]['bankId'] === idBanco) {
+        const index = _.findIndex((value as unknown as Array<AccountBank>), (obj) => {
+          return obj.clientId === cliente_nuevo.id;
+        });
+        msj = `El cliente ${cliente_nuevo.name} ` +
+              `con cuenta en banco estado se encuentra en la posicion ` +
+              `${index}`;
+      }
+    });
 
-  addClient( taxNumber: string, name: string, id = (this.clients.length + 1)): Client {
+    return msj;
+  }
+
+
+  addClient(taxNumber: string, name: string, id = (this.clients.length + 1) ): Client {
 
     const newClient: Client = {
       id: id,
-      name: name,
-      taxNumber: taxNumber
+      taxNumber: taxNumber,
+      name: name
     };
     this.clients.push(newClient);
-    return this.clients[(this.clients.length - 1)];
+    return _.last(this.clients);
   }
 
   addClienteBanco(balance = 9000, bankId = this.banks[2].id, clientId = this.clients.length): AccountBank {
@@ -266,7 +280,7 @@ export class AppComponent {
     };
 
     this.accounts.push(newAccount);
-    return this.accounts[(this.accounts.length - 1)];
+    return _.last(this.accounts);
 
   }
 }

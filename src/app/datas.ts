@@ -5,6 +5,7 @@ export interface Client {
 }
 
 export interface AccountBank {
+  [x: string]: any;
   clientId?: number;
   bankId: number;
   balance: number;
