@@ -59,3 +59,21 @@ export const banks: Bank[] = [
   { id: 3, name: 'ESTADO' }
 ];
 
+
+export const colores = [
+  {
+    'name': 'jim',
+    'color': 'blue',
+    'age': '22'
+  },
+  {
+    'name': 'Sam',
+    'color': 'blue',
+    'age': '33'
+  },
+  {
+    'name': 'eddie',
+    'color': 'green',
+    'age': '77'
+  }
+]

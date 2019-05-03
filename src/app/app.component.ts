@@ -1,7 +1,10 @@
 import { Component } from '@angular/core';
 import { clients, banks, accounts, Client, AccountBank, Bank } from './datas';
 import * as _ from 'lodash';
-import { Dictionary } from 'lodash';
+import { AsyncAwait } from './async-await';
+
+
+
 
 @Component({
   selector: 'app-root',
@@ -18,7 +21,16 @@ export class AppComponent {
   constructor() {
     this.clienteBancos = this.accountReducer();
 
-   console.log('---> ', this.newClientRanking());
+   // console.log('---> ', this.newClientRanking());
+/*    console.log('Pregunta 1');
+   console.log(this.sortSaldosForBank()); */
+
+    const asynAwait = new AsyncAwait();
+    asynAwait.dramaticWelcome();
+
+    console.log(asynAwait.sortForColor());
+
+
   }
 
 
@@ -141,7 +153,7 @@ export class AppComponent {
 
       let listClient: Client[] = null;
 
-      listClient = _.reduce(value, (result: Client[], cuentaCliente, key) => {
+      listClient = _.reduce(value, (result: Client[], cuentaCliente) => {
         let client: Client = null;
         client = _.find(this.clients, (cl) => {
           return (cl.id === cuentaCliente.clientId);
@@ -240,7 +252,7 @@ export class AppComponent {
 // No modificar arreglos originales para no alterar las respuestas anteriores al correr la solución
   newClientRanking(idBanco = 3): string | null {
 
-    const tupla_cliente_nuevo: [string, string] = ['26454212K', 'Carlos Talavera']
+    const tupla_cliente_nuevo: [string, string] = ['26454212K', 'Carlos Talavera'];
     const cliente_nuevo = this.addClient(...tupla_cliente_nuevo);
     this.addClienteBanco();
     const listPreguntaDos = this.sortSaldosForBank();
