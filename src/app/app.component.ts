@@ -21,28 +21,39 @@ export class AppComponent {
   constructor() {
     this.clienteBancos = this.accountReducer();
 
-   // console.log('---> ', this.newClientRanking());
-/*    console.log('Pregunta 1');
-   console.log(this.sortSaldosForBank()); */
+   console.log('Pregunta 1');
+   console.log(this.sortSaldosForBank());
 
     const asynAwait = new AsyncAwait();
-    asynAwait.dramaticWelcome();
 
-    console.log(asynAwait.sortForColor());
-
-
+    // asynAwait.dramaticWelcome();
+    // console.log(asynAwait.sortForColor());
   }
-
-
-
 
   listClientsIds() {
     return clients.map((client) => client.id);
   }
 
   // 1 Arreglo con los ids de clientes ordenados por rut
-  listClientsIdsSortByTaxNumber(): Client[] {
-    return _.orderBy(this.clients, ['taxNumber'], ['asc']);
+  listClientsIdsSortByTaxNumber() {
+    return _.chain(this.clients)
+      .orderBy(['taxNumber'], ['asc'])
+      .tap(valor => console.log('el valor es ', valor))
+      .map((value) => {
+        return value.id;
+      })
+      .value();
+  }
+
+  // 2 Arreglo con los nombres de cliente ordenados de mayor a menor por la suma TOTAL de los saldos
+  // de cada cliente en los bancos que participa.
+  sortSaldosForBank(): AccountBank[] {
+    const clientForBank = [];
+    _.forEach(this.banks, (bank) => {
+      clientForBank.push(this.getClientesPorBanco(this.accountReducer(), bank.id));
+    });
+
+    return clientForBank;
   }
 
   sortClientsForBanck() {
@@ -88,22 +99,17 @@ export class AppComponent {
     });
   }
 
-  // 2 Arreglo con los nombres de cliente ordenados de mayor a menor por la suma TOTAL de los saldos
-  // de cada cliente en los bancos que participa.
-  sortSaldosForBank(): AccountBank[] {
-    const clientForBank = [];
-    _.forEach(this.banks, (bank) => {
-      clientForBank.push(this.getClientesPorBanco(this.accountReducer(), bank.id));
-    });
-
-    return clientForBank;
-  }
-
   getClientesPorBanco(cuentas: AccountBank[], idBanco: number): AccountBank[] {
     const clientList = _.filter(cuentas, (cuenta) => {
       return (cuenta.bankId === idBanco);
     });
     const saldos = _.orderBy(clientList, ['total'], ['desc']);
+
+    const saldos2 = _.chain(cuentas)
+    .filter(cuenta => (cuenta.bankId === idBanco))
+    .orderBy(['total'], ['desc'])
+    .value();
+
     _.forEach(saldos, (cuenta) => {
       const findCliente = _.find(this.clients, (client) => {
         return (cuenta.clientId === client.id);
@@ -111,6 +117,9 @@ export class AppComponent {
       cuenta.nameCliente = findCliente.name;
     });
     return saldos;
+
+
+
   }
 
   accountReducer(): AccountBank[] {
